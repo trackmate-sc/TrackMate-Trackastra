@@ -14,7 +14,7 @@ public class TrackastraCLI extends CLIConfigurator
 
 	public static final String KEY_TRACKASTRA_PYTHON_FILEPATH = "TRACKASTRA_PYTHON_FILEPATH";;
 
-	public static final String DEFAULT_TRACKASTRA_PYTHON_FILEPATH = null;
+	public static final String DEFAULT_TRACKASTRA_PYTHON_FILEPATH = System.getProperty( "home.dir" );
 
 	public static final String KEY_TRACKASTRA_MODEL = "PRETRAINED_MODEL";
 
@@ -29,6 +29,8 @@ public class TrackastraCLI extends CLIConfigurator
 	public static final Boolean DEFAULT_USE_GPU = Boolean.valueOf( true );
 
 	public static final String KEY_TRACKASTRA_TRACKING_MODE = "TRACKING_MODE";
+
+	public static final String DEFAULT_TRACKASTRA_TRACKING_MODE = "greedy";
 
 	public static final String KEY_TRACKASTRA_INPUT_IMGS_FOLDER = "INPUT_IMGS_FOLDER";
 

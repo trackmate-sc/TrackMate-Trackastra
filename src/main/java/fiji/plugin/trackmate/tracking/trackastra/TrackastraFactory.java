@@ -1,6 +1,22 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
+import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readStringAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_CUSTOM_MODEL_FOLDER;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_MODEL;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_PYTHON_FILEPATH;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_TRACKING_MODE;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_USE_GPU;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_INPUT_IMGS_FOLDER;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_INPUT_MASKS_FOLDER;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_MODEL;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_OUTPUT_TABLE_PATH;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_PYTHON_FILEPATH;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_TRACKING_MODE;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_USE_GPU;
+import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -12,17 +28,17 @@ import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.io.IOUtils;
-import fiji.plugin.trackmate.tracking.SpotGlobalTrackerFactory;
+import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.cli.TrackMateSettingsBuilder;
+import ij.ImagePlus;
 
 @Plugin( type = SpotTrackerFactory.class )
-public class TrackastraFactory implements SpotGlobalTrackerFactory
+public class TrackastraFactory implements SpotImageTrackerFactory
 {
 
 	/*
@@ -92,12 +108,13 @@ public class TrackastraFactory implements SpotGlobalTrackerFactory
 		return NAME;
 	}
 
+
 	@Override
-	public TrackastraTracker create( final TrackMate trackmate, final Map< String, Object > settings )
+	public TrackastraTracker create( final SpotCollection spots, final Map< String, Object > settings, final ImagePlus imp )
 	{
 		final TrackastraCLI cli = new TrackastraCLI();
 		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli );
-		return new TrackastraTracker( cli, trackmate );
+		return new TrackastraTracker( cli, spots, imp );
 	}
 
 	@Override
@@ -109,36 +126,29 @@ public class TrackastraFactory implements SpotGlobalTrackerFactory
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
-		errorMessage = null;
-		final StringBuilder str = new StringBuilder();
 		boolean ok = true;
-		for ( final String key : settings.keySet() )
-		{
-			final Object obj = settings.get( key );
-			if ( obj == null )
-			{
-				str.append( "Parameter " + key + " is not set.\n" );
-				ok = false;
-				continue;
-			}
-			ok = ok & writeAttribute( settings, element, key, obj.getClass(), str );
-		}
+		final StringBuilder errorHolder = new StringBuilder();
+		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_PYTHON_FILEPATH, String.class, errorHolder );
+		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_MODEL, String.class, errorHolder );
+		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, String.class, errorHolder );
+		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_TRACKING_MODE, String.class, errorHolder );
+		ok = ok & writeAttribute( settings, element, KEY_USE_GPU, Boolean.class, errorHolder );
 		if ( !ok )
-			errorMessage = str.toString();
+			errorMessage = errorHolder.toString();
 		return ok;
 	}
 
 	@Override
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
+		settings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
-		final Map< String, Object > def = getDefaultSettings();
 		boolean ok = true;
-		for ( final String key : def.keySet() )
-		{
-			final Class< ? extends Object > clazz = def.get( key ).getClass();
-			ok = ok & IOUtils.readAttribute( element, key, clazz, settings, errorHolder );
-		}
+		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_PYTHON_FILEPATH, errorHolder );
+		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_MODEL, errorHolder );
+		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, errorHolder );
+		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_TRACKING_MODE, errorHolder );
+		ok = ok & readBooleanAttribute( element, settings, KEY_USE_GPU, errorHolder );
 		if ( !ok )
 			errorMessage = errorHolder.toString();
 		return ok;
@@ -155,22 +165,37 @@ public class TrackastraFactory implements SpotGlobalTrackerFactory
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final TrackastraCLI cli = new TrackastraCLI();
 		final Map< String, Object > map = new HashMap<>();
-		TrackMateSettingsBuilder.toTrackMateSettings( map, cli );
+		map.put( KEY_TRACKASTRA_PYTHON_FILEPATH, DEFAULT_TRACKASTRA_PYTHON_FILEPATH );
+		map.put( KEY_TRACKASTRA_MODEL, DEFAULT_TRACKASTRA_MODEL );
+		map.put( KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, DEFAULT_TRACKASTRA_CUSTOM_MODEL_FOLDER );
+		map.put( KEY_TRACKASTRA_TRACKING_MODE, DEFAULT_TRACKASTRA_TRACKING_MODE );
+		map.put( KEY_USE_GPU, DEFAULT_USE_GPU );
+		map.put( KEY_TRACKASTRA_INPUT_MASKS_FOLDER, null );
+		map.put( KEY_TRACKASTRA_INPUT_IMGS_FOLDER, null );
+		map.put( KEY_TRACKASTRA_OUTPUT_TABLE_PATH, null );
 		return map;
 	}
 
 	@Override
 	public boolean checkSettingsValidity( final Map< String, Object > settings )
 	{
-		errorMessage = null;
-		final TrackastraCLI cli = new TrackastraCLI();
-		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli );
-		final String error = cli.check();
-		if ( error != null )
+		if ( null == settings )
 		{
-			errorMessage = error;
+			errorMessage = "Settings map is null.\n";
+			return false;
+		}
+
+		boolean ok = true;
+		final StringBuilder str = new StringBuilder();
+		ok = ok & checkParameter( settings, KEY_TRACKASTRA_PYTHON_FILEPATH, String.class, str );
+		ok = ok & checkParameter( settings, KEY_TRACKASTRA_MODEL, String.class, str );
+		ok = ok & checkParameter( settings, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, String.class, str );
+		ok = ok & checkParameter( settings, KEY_TRACKASTRA_TRACKING_MODE, String.class, str );
+		ok = ok & checkParameter( settings, KEY_USE_GPU, Boolean.class, str );
+		if ( !ok )
+		{
+			errorMessage = str.toString();
 			return false;
 		}
 		return true;
@@ -183,7 +208,7 @@ public class TrackastraFactory implements SpotGlobalTrackerFactory
 	}
 
 	@Override
-	public SpotTrackerFactory copy()
+	public SpotImageTrackerFactory copy()
 	{
 		return new TrackastraFactory();
 	}

@@ -12,15 +12,18 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.LabelImgExporter;
 import fiji.plugin.trackmate.action.LabelImgExporter.LabelIdPainting;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.cli.CLIUtils;
 import fiji.plugin.trackmate.util.cli.CommandBuilder;
+import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
 import ij.plugin.StackWriter;
+import net.imagej.ImgPlus;
 import net.imglib2.algorithm.Benchmark;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.type.numeric.real.FloatType;
 
 public class TrackastraTracker implements SpotTracker, Benchmark
 {
@@ -39,12 +42,15 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 
 	private long processingTime;
 
-	private final TrackMate trackmate;
+	private final SpotCollection spots;
 
-	public TrackastraTracker( final TrackastraCLI cli, final TrackMate trackmate )
+	private final ImagePlus imp;
+
+	public TrackastraTracker( final TrackastraCLI cli, final SpotCollection spots, final ImagePlus imp )
 	{
 		this.cli = cli;
-		this.trackmate = trackmate;
+		this.spots = spots;
+		this.imp = imp;
 	}
 
 	@Override
@@ -74,7 +80,6 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			return false;
 		}
 
-		final SpotCollection spots = trackmate.getModel().getSpots();
 		// Check that the objects list itself isn't null
 		if ( null == spots )
 		{
@@ -99,18 +104,29 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		 * 1. Export masks to tmp folder.
 		 */
 
+		final int[] dimensions = imp.getDimensions();
+		final long[] dims = new long[] { dimensions[ 0 ], dimensions[ 1 ], dimensions[ 3 ], dimensions[ 4 ] };
+		final double[] calibration = new double[] {
+				imp.getCalibration().pixelWidth,
+				imp.getCalibration().pixelHeight,
+				imp.getCalibration().pixelDepth,
+				imp.getCalibration().frameInterval
+		};
 		final boolean exportSpotsAsDots = false;
-		final boolean exportTracksOnly = false;
 		final LabelIdPainting labelIdPainting = LabelIdPainting.LABEL_IS_INDEX_MOVIE_UNIQUE;
-		final ImagePlus masks = LabelImgExporter.createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger );
-
+		final ImgPlus< FloatType > masks = LabelImgExporter.createLabelImg( spots, dims, calibration, exportSpotsAsDots, labelIdPainting, logger );
+		final ImagePlus maskImp = ImageJFunctions.wrap( masks, "masks" );
+		maskImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
+		maskImp.setLut( GlasbeyLut.toLUT() );
+		maskImp.setDisplayRange( 0, 255 );
+		maskImp.setOpenAsHyperStack( true );
 		Path maskTmpFolder;
 		try
 		{
 			maskTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-masks_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( maskTmpFolder );
 			final String saveOptions = "";
-			StackWriter.save( masks, maskTmpFolder.toString(), saveOptions );
+			StackWriter.save( maskImp, maskTmpFolder.toString(), saveOptions );
 		}
 		catch ( final IOException e )
 		{
@@ -128,7 +144,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			imgTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-imgs_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( imgTmpFolder );
 			final String saveOptions = "";
-			StackWriter.save( trackmate.getSettings().imp, imgTmpFolder.toString(), saveOptions );
+			StackWriter.save( imp, imgTmpFolder.toString(), saveOptions );
 		}
 		catch ( final IOException e )
 		{
@@ -192,7 +208,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		 */
 
 		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
-		TrackastraImporter.importEdges( edgeCSVTablePath, trackmate.getModel().getSpots(), graph );
+		TrackastraImporter.importEdges( edgeCSVTablePath, spots, graph );
 
 		logger.setProgress( 1d );
 		logger.setStatus( "" );
