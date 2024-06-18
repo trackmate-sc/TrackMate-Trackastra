@@ -106,6 +106,7 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
+		// FIXME: this does not update the GUI.
 		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli );
 	}
 
