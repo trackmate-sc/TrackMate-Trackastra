@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.tracking.trackastra;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -26,6 +27,8 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 
 	final static String BASE_ERROR_MESSAGE = "[Trackastra] ";
 
+	private static final String EDGE_CSV_FILENAME = "trackastra-edge-table.csv";
+
 	private SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
 	private Logger logger = Logger.VOID_LOGGER;
@@ -34,14 +37,14 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 
 	private final TrackastraCLI cli;
 
-	private final SpotCollection spots;
-
 	private long processingTime;
 
-	public TrackastraTracker( final TrackastraCLI cli, final SpotCollection spots )
+	private final TrackMate trackmate;
+
+	public TrackastraTracker( final TrackastraCLI cli, final TrackMate trackmate )
 	{
 		this.cli = cli;
-		this.spots = spots;
+		this.trackmate = trackmate;
 	}
 
 	@Override
@@ -71,6 +74,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			return false;
 		}
 
+		final SpotCollection spots = trackmate.getModel().getSpots();
 		// Check that the objects list itself isn't null
 		if ( null == spots )
 		{
@@ -94,8 +98,6 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		/*
 		 * 1. Export masks to tmp folder.
 		 */
-
-		final TrackMate trackmate = null; // FIXME
 
 		final boolean exportSpotsAsDots = false;
 		final boolean exportTracksOnly = false;
@@ -140,13 +142,57 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 
 		cli.maskFolder().set( maskTmpFolder.toString() );
 		cli.imageFolder().set( imgTmpFolder.toString() );
-		final List< String > command = CommandBuilder.build( cli );
+		final Path edgeCSVTablePath = maskTmpFolder.resolve( EDGE_CSV_FILENAME );
+		cli.outputEdgeFile().set( edgeCSVTablePath.toString() );
+		final String executableName = Paths.get( cli.getExecutableArg().getValue() ).getFileName().toString();
+
+		Process process;
+		try
+		{
+			final List< String > cmd = CommandBuilder.build( cli );
+			logger.setStatus( "Running " + executableName );
+			logger.log( "Running " + executableName + " with args:\n" );
+			logger.log( String.join( " ", cmd ) );
+			logger.log( "\n" );
+			final ProcessBuilder pb = new ProcessBuilder( cmd );
+			pb.redirectOutput( ProcessBuilder.Redirect.INHERIT );
+			pb.redirectError( ProcessBuilder.Redirect.INHERIT );
+
+			process = pb.start();
+			process.waitFor();
+		}
+		catch ( final IOException e )
+		{
+			final String msg = e.getMessage();
+			if ( msg.matches( ".+error=13.+" ) )
+			{
+				errorMessage = BASE_ERROR_MESSAGE + "Problem running " + executableName + ":\n"
+						+ "The executable does not have the file permission to run.\n";
+			}
+			else
+			{
+				errorMessage = BASE_ERROR_MESSAGE + "Problem running " + executableName + ":\n" + e.getMessage();
+			}
+			e.printStackTrace();
+			return false;
+		}
+		catch ( final Exception e )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Problem running " + executableName + ":\n" + e.getMessage();
+			e.printStackTrace();
+			return false;
+		}
+		finally
+		{
+			process = null;
+		}
 
 		/*
-		 * Read Trackastra results and pass it to a new graph.
+		 * 4. Read Trackastra results and pass it to the new graph.
 		 */
 
 		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
+		TrackastraImporter.importEdges( edgeCSVTablePath, trackmate.getModel().getSpots(), graph );
 
 		logger.setProgress( 1d );
 		logger.setStatus( "" );
