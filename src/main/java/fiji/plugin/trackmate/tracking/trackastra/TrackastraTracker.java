@@ -72,14 +72,6 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		 * Check input now.
 		 */
 
-		final String error = cli.check();
-		final boolean ok = error == null;
-		if ( !ok )
-		{
-			errorMessage = BASE_ERROR_MESSAGE + error;
-			return false;
-		}
-
 		// Check that the objects list itself isn't null
 		if ( null == spots )
 		{
@@ -161,6 +153,15 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		final Path edgeCSVTablePath = maskTmpFolder.resolve( EDGE_CSV_FILENAME );
 		cli.outputEdgeFile().set( edgeCSVTablePath.toString() );
 		final String executableName = Paths.get( cli.getExecutableArg().getValue() ).getFileName().toString();
+
+		// Check validity of the CLI.
+		final String error = cli.check();
+		final boolean ok = error == null;
+		if ( !ok )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + error;
+			return false;
+		}
 
 		Process process;
 		try
