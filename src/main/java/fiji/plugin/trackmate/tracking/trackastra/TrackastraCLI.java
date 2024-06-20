@@ -4,10 +4,9 @@ import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPL
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
 
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
@@ -44,7 +43,7 @@ public class TrackastraCLI extends CLIConfigurator
 
 	public static final String KEY_TRACKASTRA_OUTPUT_TABLE_PATH = "OUTPUT_EDGE_TABLE_PATH";
 
-	private static final String TRACKSTRA_EXECUTABLE_NAME = "trackastra";
+	private static final String TRACKSTRA_EXECUTABLE_NAME = "trackastra.cli";
 
 	private final ChoiceArgument modelPretrained;
 
@@ -90,7 +89,7 @@ public class TrackastraCLI extends CLIConfigurator
 			cmd.add( executablePath );
 			cmd.add( "-m" );
 			cmd.add( TRACKSTRA_EXECUTABLE_NAME );
-			return StringUtils.join( cmd, " " );
+			return cmd;
 		} );
 		
 		this.modelPretrained = addChoiceArgument()
@@ -134,7 +133,7 @@ public class TrackastraCLI extends CLIConfigurator
 				.defaultValue( DEFAULT_USE_GPU )
 				.key( KEY_USE_GPU )
 				.get();
-		this.setTranslator( useGPU, b -> ( ( Boolean ) b ).booleanValue() ? "cuda" : "cpu" );
+		setTranslator( useGPU, b -> Collections.singletonList( ( ( Boolean ) b ).booleanValue() ? "cuda" : "cpu" ) );
 
 		this.imageFolder = addPathArgument()
 				.name( "Input image folder path" )
