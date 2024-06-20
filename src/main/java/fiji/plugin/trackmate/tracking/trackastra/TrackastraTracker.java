@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.commons.io.input.Tailer;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -22,6 +23,7 @@ import fiji.plugin.trackmate.action.LabelImgExporter;
 import fiji.plugin.trackmate.action.LabelImgExporter.LabelIdPainting;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.cli.CLIUtils;
+import fiji.plugin.trackmate.util.cli.CLIUtils.LoggerTailerListener;
 import fiji.plugin.trackmate.util.cli.CommandBuilder;
 import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
@@ -38,6 +40,8 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 	final static String BASE_ERROR_MESSAGE = "[Trackastra] ";
 
 	private static final String EDGE_CSV_FILENAME = "trackastra-edge-table.csv";
+
+	private static final String TRACKASTRA_LOG_FILENAME = "trackastra-log.txt";
 
 	private SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
@@ -195,17 +199,26 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			return false;
 		}
 
+		// Redirect log to logger.
+		final File logFile = maskTmpFolder.resolve( TRACKASTRA_LOG_FILENAME ).toFile();
+		final Tailer tailer = Tailer.create( logFile, new LoggerTailerListener( logger ), 200, true );
 		Process process;
 		try
 		{
+
 			final List< String > cmd = CommandBuilder.build( cli );
 			logger.setStatus( "Running " + TRACKSTRA_EXECUTABLE_NAME );
 			logger.log( "Running " + TRACKSTRA_EXECUTABLE_NAME + " with args:\n" );
-			logger.log( String.join( " ", cmd ) );
+			cmd.forEach( t -> {
+				if ( t.contains( File.separator ) )
+					logger.log( t + ' ' );
+				else
+					logger.log( t + ' ', Logger.GREEN_COLOR.darker() );
+			} );
 			logger.log( "\n" );
 			final ProcessBuilder pb = new ProcessBuilder( cmd );
-			pb.redirectOutput( ProcessBuilder.Redirect.INHERIT );
-			pb.redirectError( ProcessBuilder.Redirect.INHERIT );
+			pb.redirectOutput( ProcessBuilder.Redirect.appendTo( logFile ) );
+			pb.redirectError( ProcessBuilder.Redirect.appendTo( logFile ) );
 
 			process = pb.start();
 			process.waitFor();
@@ -233,6 +246,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		}
 		finally
 		{
+			tailer.stop();
 			process = null;
 		}
 
