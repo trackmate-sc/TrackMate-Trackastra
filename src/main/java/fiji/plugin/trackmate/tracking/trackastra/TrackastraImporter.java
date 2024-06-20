@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
 
@@ -8,6 +10,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -15,7 +18,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class TrackastraImporter
 {
-	public static void importEdges( final Path edges, final SpotCollection spots, final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph )
+	public static void importEdges( final Path edges, final SpotCollection spots, final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph ) throws FileNotFoundException, IOException, CsvException
 	{
 		// Map of frame -> label -> spot.
 		final TIntObjectHashMap< TIntObjectHashMap< Spot > > idMap = new TIntObjectHashMap<>();
@@ -74,10 +77,6 @@ public class TrackastraImporter
 
 				addEdge( source, target, weight, graph );
 			}
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
 		}
 	}
 

@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +10,8 @@ import java.util.List;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
+import com.opencsv.exceptions.CsvException;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -120,6 +123,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			maskTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-masks_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( maskTmpFolder );
 			final String saveOptions = "";
+			logger.log( "Saving masks to " + maskTmpFolder + "\n" );
 			StackWriter.save( maskImp, maskTmpFolder.toString() + File.separator, saveOptions );
 		}
 		catch ( final IOException e )
@@ -134,15 +138,17 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 
 		final int nChannels = imp.getNChannels();
 		final ImagePlus out;
+		final int c;
 		if ( nChannels == 1 )
 		{
+			c = -1;
 			out = imp;
 
 		}
 		else
 		{
 			// Get the right channel.
-			final int c = cli.imageChannel().get();
+			c = cli.imageChannel().get();
 			final int nZ = imp.getNSlices();
 			final int nT = imp.getNFrames();
 			out = new Duplicator().run( imp, c, c, 1, nZ, 1, nT );
@@ -154,6 +160,10 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			imgTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-imgs_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( imgTmpFolder );
 			final String saveOptions = "";
+			if ( c < 0 )
+				logger.log( "Saving source image to " + imgTmpFolder + "\n" );
+			else
+				logger.log( "Saving channel " + c + " of the source image to " + imgTmpFolder + "\n" );
 			StackWriter.save( out, imgTmpFolder.toString() + File.separator, saveOptions );
 		}
 		catch ( final IOException e )
@@ -226,15 +236,39 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		 * 4. Read Trackastra results and pass it to the new graph.
 		 */
 
+		logger.log( "Importing Trackastra results file " + edgeCSVTablePath + ".\n" );
 		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
-		TrackastraImporter.importEdges( edgeCSVTablePath, spots, graph );
+		try
+		{
+			TrackastraImporter.importEdges( edgeCSVTablePath, spots, graph );
+		}
+		catch ( final FileNotFoundException e )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Could not find Trackastra output file " + EDGE_CSV_FILENAME + "\n"
+					+ "Trackastra did not execute properly?\n"
+					+ e.getMessage();
+			return false;
+		}
+		catch ( final IOException e )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Could not read Trackastra output file " + EDGE_CSV_FILENAME + "\n"
+					+ e.getMessage();
+			return false;
+		}
+		catch ( final CsvException e )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Issue with the Trackastra output file " + EDGE_CSV_FILENAME + "\n"
+					+ e.getMessage();
+			return false;
+		}
+		finally
+		{
+			logger.setProgress( 1d );
+			logger.setStatus( "" );
 
-		logger.setProgress( 1d );
-		logger.setStatus( "" );
-
-		final long end = System.currentTimeMillis();
-		processingTime = end - start;
-
+			final long end = System.currentTimeMillis();
+			processingTime = end - start;
+		}
 		return true;
 	}
 
