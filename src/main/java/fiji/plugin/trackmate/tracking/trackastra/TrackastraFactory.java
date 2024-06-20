@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readStringAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_CUSTOM_MODEL_FOLDER;
@@ -112,15 +114,15 @@ public class TrackastraFactory implements SpotImageTrackerFactory
 	@Override
 	public TrackastraTracker create( final SpotCollection spots, final Map< String, Object > settings, final ImagePlus imp )
 	{
-		final TrackastraCLI cli = new TrackastraCLI();
-		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli );
+		final TrackastraCLI cli = new TrackastraCLI( imp.getNChannels() );
+		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli, cli.imageChannel() );
 		return new TrackastraTracker( cli, spots, imp );
 	}
 
 	@Override
-	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
+	public ConfigurationPanel getTrackerConfigurationPanel( final Model model, final ImagePlus imp )
 	{
-		return new TrackastraConfigurationPanel();
+		return new TrackastraConfigurationPanel( imp.getNChannels() );
 	}
 
 	@Override
@@ -133,6 +135,7 @@ public class TrackastraFactory implements SpotImageTrackerFactory
 		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, String.class, errorHolder );
 		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_TRACKING_MODE, String.class, errorHolder );
 		ok = ok & writeAttribute( settings, element, KEY_USE_GPU, Boolean.class, errorHolder );
+		ok = ok & writeAttribute( settings, element, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
 		if ( !ok )
 			errorMessage = errorHolder.toString();
 		return ok;
@@ -149,6 +152,7 @@ public class TrackastraFactory implements SpotImageTrackerFactory
 		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, errorHolder );
 		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_TRACKING_MODE, errorHolder );
 		ok = ok & readBooleanAttribute( element, settings, KEY_USE_GPU, errorHolder );
+		ok = ok & readIntegerAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
 		if ( !ok )
 			errorMessage = errorHolder.toString();
 		return ok;
@@ -171,6 +175,7 @@ public class TrackastraFactory implements SpotImageTrackerFactory
 		map.put( KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, DEFAULT_TRACKASTRA_CUSTOM_MODEL_FOLDER );
 		map.put( KEY_TRACKASTRA_TRACKING_MODE, DEFAULT_TRACKASTRA_TRACKING_MODE );
 		map.put( KEY_USE_GPU, DEFAULT_USE_GPU );
+		map.put( KEY_TARGET_CHANNEL, Integer.valueOf( 1 ) );
 		map.put( KEY_TRACKASTRA_INPUT_MASKS_FOLDER, null );
 		map.put( KEY_TRACKASTRA_INPUT_IMGS_FOLDER, null );
 		map.put( KEY_TRACKASTRA_OUTPUT_TABLE_PATH, null );
@@ -193,6 +198,7 @@ public class TrackastraFactory implements SpotImageTrackerFactory
 		ok = ok & checkParameter( settings, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, String.class, str );
 		ok = ok & checkParameter( settings, KEY_TRACKASTRA_TRACKING_MODE, String.class, str );
 		ok = ok & checkParameter( settings, KEY_USE_GPU, Boolean.class, str );
+		ok = ok & checkParameter( settings, KEY_TARGET_CHANNEL, Integer.class, str );
 		if ( !ok )
 		{
 			errorMessage = str.toString();

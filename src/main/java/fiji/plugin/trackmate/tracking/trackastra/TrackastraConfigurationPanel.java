@@ -42,7 +42,6 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.util.cli.CliGuiBuilder;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder.CliConfigPanel;
 import fiji.plugin.trackmate.util.cli.TrackMateSettingsBuilder;
 
@@ -61,9 +60,9 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 
 	private final CliConfigPanel mainPanel;
 
-	public TrackastraConfigurationPanel()
+	public TrackastraConfigurationPanel( final int nChannels )
 	{
-		this.cli = new TrackastraCLI();
+		this.cli = new TrackastraCLI( nChannels );
 
 		final BorderLayout borderLayout = new BorderLayout();
 		setLayout( borderLayout );
@@ -99,7 +98,7 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 		 * CONFIG
 		 */
 
-		this.mainPanel = CliGuiBuilder.build( cli );
+		this.mainPanel = TrackastraCLI.build( cli );
 		final JScrollPane scrollPane = new JScrollPane( mainPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
 		scrollPane.setBorder( null );
 		scrollPane.getVerticalScrollBar().setUnitIncrement( 16 );
@@ -109,7 +108,7 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli );
+		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli, cli.imageChannel() );
 		mainPanel.refresh();
 	}
 
@@ -117,7 +116,7 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 	public Map< String, Object > getSettings()
 	{
 		final Map< String, Object > map = new HashMap<>();
-		TrackMateSettingsBuilder.toTrackMateSettings( map, cli );
+		TrackMateSettingsBuilder.toTrackMateSettings( map, cli, cli.imageChannel() );
 		return map;
 	}
 

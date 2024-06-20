@@ -1,17 +1,19 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
-import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS;
+
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator;
+import fiji.plugin.trackmate.util.cli.CliGuiBuilder;
+import fiji.plugin.trackmate.util.cli.CliGuiBuilder.CliConfigPanel;
 import ij.IJ;
 
 public class TrackastraCLI extends CLIConfigurator
@@ -61,8 +63,15 @@ public class TrackastraCLI extends CLIConfigurator
 
 	private final PathArgument outputEdgeFile;
 
-	public TrackastraCLI()
+	private final IntElement imageChannel;
+
+	public TrackastraCLI( final int nChannels )
 	{
+		final AtomicInteger selectedChannel = new AtomicInteger( 1 );
+		this.imageChannel = StyleElements.intElement( KEY_TARGET_CHANNEL,
+				1, nChannels,
+				selectedChannel::get, selectedChannel::set );
+
 		getExecutableArg()
 				.name( "Trackastra env Python executable" )
 				.help( "Path to Python executable in Trackastra env." )
@@ -193,11 +202,23 @@ public class TrackastraCLI extends CLIConfigurator
 		return trackingMode;
 	}
 
-	public static StyleElement[] extraElements( final Map< String, Object > map )
+	/**
+	 * Exposes the element that configures in what channel of the source image
+	 * are the objects we want to track. The channel value is 1-based.
+	 * <p>
+	 * This is important for a multi-channel image. In Trackastra, this channel
+	 * is used to computes some object features used for tracking. This extra
+	 * element is not used in the CLI.
+	 * 
+	 * @return the image channel element.
+	 */
+	public IntElement imageChannel()
 	{
-		final BooleanElement simplyContourEl = StyleElements.booleanElement( KEY_SIMPLIFY_CONTOURS,
-				() -> ( ( Boolean ) map.getOrDefault( KEY_SIMPLIFY_CONTOURS, true ) ),
-				b -> map.put( KEY_SIMPLIFY_CONTOURS, b ) );
-		return new StyleElement[] { simplyContourEl };
+		return imageChannel;
+	}
+
+	public static CliConfigPanel build( final TrackastraCLI cli )
+	{
+		return CliGuiBuilder.build( cli, cli.imageChannel );
 	}
 }

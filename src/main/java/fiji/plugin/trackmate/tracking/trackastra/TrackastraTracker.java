@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import fiji.plugin.trackmate.util.cli.CLIUtils;
 import fiji.plugin.trackmate.util.cli.CommandBuilder;
 import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
+import ij.plugin.Duplicator;
 import ij.plugin.StackWriter;
 import net.imagej.ImgPlus;
 import net.imglib2.algorithm.Benchmark;
@@ -118,7 +120,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			maskTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-masks_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( maskTmpFolder );
 			final String saveOptions = "";
-			StackWriter.save( maskImp, maskTmpFolder.toString(), saveOptions );
+			StackWriter.save( maskImp, maskTmpFolder.toString() + File.separator, saveOptions );
 		}
 		catch ( final IOException e )
 		{
@@ -130,13 +132,29 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		 * 2. Export input image to tmp folder.
 		 */
 
+		final int nChannels = imp.getNChannels();
+		final ImagePlus out;
+		if ( nChannels == 1 )
+		{
+			out = imp;
+
+		}
+		else
+		{
+			// Get the right channel.
+			final int c = cli.imageChannel().get();
+			final int nZ = imp.getNSlices();
+			final int nT = imp.getNFrames();
+			out = new Duplicator().run( imp, c, c, 1, nZ, 1, nT );
+		}
+
 		Path imgTmpFolder;
 		try
 		{
 			imgTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-imgs_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( imgTmpFolder );
 			final String saveOptions = "";
-			StackWriter.save( imp, imgTmpFolder.toString(), saveOptions );
+			StackWriter.save( out, imgTmpFolder.toString() + File.separator, saveOptions );
 		}
 		catch ( final IOException e )
 		{
