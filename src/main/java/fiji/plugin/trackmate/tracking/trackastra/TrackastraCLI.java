@@ -45,7 +45,7 @@ public class TrackastraCLI extends CLIConfigurator
 
 	public static final String KEY_TRACKASTRA_OUTPUT_TABLE_PATH = "OUTPUT_EDGE_TABLE_PATH";
 
-	private static final String TRACKSTRA_EXECUTABLE_NAME = "trackastra.cli";
+	public static final String TRACKSTRA_EXECUTABLE_NAME = "trackastra";
 
 	private final ChoiceArgument modelPretrained;
 
@@ -89,12 +89,16 @@ public class TrackastraCLI extends CLIConfigurator
 				final String envname = split[ split.length - 2 ];
 				cmd.addAll( Arrays.asList( "cmd.exe", "/c", "conda", "activate", envname ) );
 				cmd.add( "&" );
+				cmd.add( TRACKSTRA_EXECUTABLE_NAME );
+				cmd.add( "track" );
 			}
-
-			// Calling Cellpose from python.
-			cmd.add( executablePath );
-			cmd.add( "-m" );
-			cmd.add( TRACKSTRA_EXECUTABLE_NAME );
+			else
+			{
+				// Calling Cellpose from python.
+				cmd.add( executablePath );
+				cmd.add( "-m" );
+				cmd.add( TRACKSTRA_EXECUTABLE_NAME );
+			}
 			return cmd;
 		} );
 		
