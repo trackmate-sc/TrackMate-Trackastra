@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.TRACKSTRA_EXECUTABLE_NAME;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +30,7 @@ import ij.plugin.StackWriter;
 import net.imagej.ImgPlus;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 public class TrackastraTracker implements SpotTracker, Benchmark
 {
@@ -111,12 +113,15 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		};
 		final boolean exportSpotsAsDots = false;
 		final LabelIdPainting labelIdPainting = LabelIdPainting.LABEL_IS_INDEX_MOVIE_UNIQUE;
-		final ImgPlus< FloatType > masks = LabelImgExporter.createLabelImg( spots, dims, calibration, exportSpotsAsDots, labelIdPainting, logger );
+		final ImgPlus< UnsignedShortType > masks = LabelImgExporter.createLabelImg(
+				spots, dims, calibration, exportSpotsAsDots, labelIdPainting,
+				new UnsignedShortType(), logger );
 		final ImagePlus maskImp = ImageJFunctions.wrap( masks, "masks" );
-		maskImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
+		maskImp.setDimensions( 1, 1, imp.getNFrames() );
 		maskImp.setLut( GlasbeyLut.toLUT() );
 		maskImp.setDisplayRange( 0, 255 );
 		maskImp.setOpenAsHyperStack( true );
+
 		Path maskTmpFolder;
 		try
 		{
@@ -143,7 +148,6 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		{
 			c = -1;
 			out = imp;
-
 		}
 		else
 		{
@@ -195,8 +199,8 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		try
 		{
 			final List< String > cmd = CommandBuilder.build( cli );
-			logger.setStatus( "Running " + executableName );
-			logger.log( "Running " + executableName + " with args:\n" );
+			logger.setStatus( "Running " + TRACKSTRA_EXECUTABLE_NAME );
+			logger.log( "Running " + TRACKSTRA_EXECUTABLE_NAME + " with args:\n" );
 			logger.log( String.join( " ", cmd ) );
 			logger.log( "\n" );
 			final ProcessBuilder pb = new ProcessBuilder( cmd );
@@ -240,7 +244,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		try
 		{
-			TrackastraImporter.importEdges( edgeCSVTablePath, spots, graph );
+			TrackastraImporter.importEdges( edgeCSVTablePath, spots, maskImp, graph );
 		}
 		catch ( final FileNotFoundException e )
 		{

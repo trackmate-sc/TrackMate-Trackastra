@@ -14,18 +14,28 @@ import com.opencsv.exceptions.CsvException;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.util.SpotUtil;
+import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import ij.ImagePlus;
+import net.imagej.ImgPlus;
+import net.imglib2.IterableInterval;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 public class TrackastraImporter
 {
-	public static void importEdges( final Path edges, final SpotCollection spots, final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph ) throws FileNotFoundException, IOException, CsvException
+	public static void importEdges( final Path edges, final SpotCollection spots, final ImagePlus masks, final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph ) throws FileNotFoundException, IOException, CsvException
 	{
 		// Map of frame -> label -> spot.
+		@SuppressWarnings( "unchecked" )
+		final ImgPlus< UnsignedShortType > maskImg = TMUtils.rawWraps( masks );
 		final TIntObjectHashMap< TIntObjectHashMap< Spot > > idMap = new TIntObjectHashMap<>();
 		for ( final Spot spot : spots.iterable( false ) )
 		{
-			final int label = spot.getFeature( "MEDIAN_INTENSITY_CH1" ).intValue();
 			final int frame = spot.getFeature( Spot.FRAME ).intValue();
+			final ImgPlus< UnsignedShortType > imgTC = TMUtils.hyperSlice( maskImg, 0, frame );
+			final IterableInterval< UnsignedShortType > it = SpotUtil.iterable( spot, imgTC );
+			final int label = it.cursor().next().get();
 			TIntObjectHashMap< Spot > map = idMap.get( frame );
 			if ( map == null )
 			{
