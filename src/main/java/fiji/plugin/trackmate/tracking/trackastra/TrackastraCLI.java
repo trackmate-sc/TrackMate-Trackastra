@@ -82,9 +82,6 @@ public class TrackastraCLI extends CLIConfigurator
 		setTranslator( getExecutableArg(), s -> {
 			final String executablePath = ( String ) s;
 			final String[] split = executablePath.replace( "\\", "/" ).split( "/" );
-			final String lastItem = split[ split.length - 1 ];
-			if ( lastItem.toLowerCase().startsWith( "python" ) )
-				System.err.println( "WARNING: Path for the " + TRACKSTRA_EXECUTABLE_NAME + " executable does not end with Python." );
 			// Activate conda env if it runs in Windows.
 			final List< String > cmd = new ArrayList<>();
 			if ( IJ.isWindows() )
