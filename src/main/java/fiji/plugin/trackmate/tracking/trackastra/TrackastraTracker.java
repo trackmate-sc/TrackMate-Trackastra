@@ -244,7 +244,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		try
 		{
-			TrackastraImporter.importEdges( edgeCSVTablePath, spots, maskImp, graph );
+			TrackastraImporter.importEdges( edgeCSVTablePath, spots, maskImp, graph, logger );
 		}
 		catch ( final FileNotFoundException e )
 		{

@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
+import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.util.SpotUtil;
@@ -24,7 +26,13 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 public class TrackastraImporter
 {
-	public static void importEdges( final Path edges, final SpotCollection spots, final ImagePlus masks, final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph ) throws FileNotFoundException, IOException, CsvException
+	public static void importEdges(
+			final Path edges,
+			final SpotCollection spots,
+			final ImagePlus masks,
+			final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph,
+			final Logger logger )
+			throws FileNotFoundException, IOException, CsvException
 	{
 		// Map of frame -> label -> spot.
 		@SuppressWarnings( "unchecked" )
@@ -62,26 +70,26 @@ public class TrackastraImporter
 				final TIntObjectHashMap< Spot > mapSource = idMap.get( sourceFrame );
 				if ( mapSource == null )
 				{
-					System.out.println( " - no spot in frame " + sourceFrame + ". Skipping." );
+					logger.log( " - no spot in frame " + sourceFrame + ". Skipping.\n", Color.ORANGE );
 					continue;
 				}
 				final Spot source = mapSource.get( sourceLabel );
 				if ( source == null )
 				{
-					System.out.println( " - no spot matching source label " + sourceLabel + ". Skipping." );
+					logger.log( " - no spot matching source label " + sourceLabel + ". Skipping.\n", Color.ORANGE );
 					continue;
 				}
 
 				final TIntObjectHashMap< Spot > mapTarget = idMap.get( targetFrame );
 				if ( mapTarget == null )
 				{
-					System.out.println( " - no spot in frame " + targetFrame + ". Skipping." );
+					logger.log( " - no spot in frame " + targetFrame + ". Skipping.\n", Color.ORANGE );
 					continue;
 				}
 				final Spot target = mapTarget.get( targetLabel );
 				if ( target == null )
 				{
-					System.out.println( " - no spot matching target label " + targetLabel + ". Skipping." );
+					logger.log( " - no spot matching target label " + targetLabel + ". Skipping.\n", Color.ORANGE );
 					continue;
 				}
 

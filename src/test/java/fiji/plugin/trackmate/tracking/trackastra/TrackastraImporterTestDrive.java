@@ -10,6 +10,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 
 import com.opencsv.exceptions.CsvException;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -42,24 +43,19 @@ public class TrackastraImporterTestDrive
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		try
 		{
-			TrackastraImporter.importEdges( Paths.get( edgeCSVfile ), spots, masks, graph );
+			TrackastraImporter.importEdges( Paths.get( edgeCSVfile ), spots, masks, graph, Logger.DEFAULT_LOGGER );
 		}
 		catch ( final FileNotFoundException e )
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch ( final IOException e )
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch ( final CsvException e )
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
-
 }
