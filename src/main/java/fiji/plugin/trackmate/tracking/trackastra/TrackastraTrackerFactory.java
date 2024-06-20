@@ -40,7 +40,7 @@ import fiji.plugin.trackmate.util.cli.TrackMateSettingsBuilder;
 import ij.ImagePlus;
 
 @Plugin( type = SpotTrackerFactory.class )
-public class TrackastraFactory implements SpotImageTrackerFactory
+public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 {
 
 	/*
@@ -79,7 +79,7 @@ public class TrackastraFactory implements SpotImageTrackerFactory
 	public static final ImageIcon ICON;
 	static
 	{
-		final URL resource = GuiUtils.getResource( "images/Tracksastra-icon.png", TrackastraFactory.class );
+		final URL resource = GuiUtils.getResource( "images/Tracksastra-icon.png", TrackastraTrackerFactory.class );
 		ICON = new ImageIcon( resource );
 	}
 
@@ -216,6 +216,6 @@ public class TrackastraFactory implements SpotImageTrackerFactory
 	@Override
 	public SpotImageTrackerFactory copy()
 	{
-		return new TrackastraFactory();
+		return new TrackastraTrackerFactory();
 	}
 }

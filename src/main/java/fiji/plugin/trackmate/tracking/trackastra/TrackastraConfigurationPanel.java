@@ -50,9 +50,9 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String TITLE = TrackastraFactory.NAME;
+	private static final String TITLE = TrackastraTrackerFactory.NAME;
 
-	protected static final ImageIcon ICON = GuiUtils.scaleImage( TrackastraFactory.ICON, 64, 64 );
+	protected static final ImageIcon ICON = GuiUtils.scaleImage( TrackastraTrackerFactory.ICON, 64, 64 );
 
 	protected static final String DOC1_URL = "https://imagej.net/plugins/trackmate/trackerss/trackmate-trackastra";
 
