@@ -132,6 +132,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			maskTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-masks_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( maskTmpFolder );
 			final String saveOptions = "";
+			logger.setStatus( "Saving masks" );
 			logger.log( "Saving masks to " + maskTmpFolder + "\n" );
 			StackWriter.save( maskImp, maskTmpFolder.toString() + File.separator, saveOptions );
 		}
@@ -168,6 +169,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			imgTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-imgs_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( imgTmpFolder );
 			final String saveOptions = "";
+			logger.setStatus( "Saving source image" );
 			if ( c < 0 )
 				logger.log( "Saving source image to " + imgTmpFolder + "\n" );
 			else
@@ -254,7 +256,8 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		 * 4. Read Trackastra results and pass it to the new graph.
 		 */
 
-		logger.log( "Importing Trackastra results file " + edgeCSVTablePath + ".\n" );
+		logger.setStatus( "Importing Trackastra results" );
+		logger.log( "Importing Trackastra results file " + edgeCSVTablePath + "\n" );
 		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		try
 		{
