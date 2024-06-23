@@ -1,23 +1,19 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
-import fiji.plugin.trackmate.util.cli.CLIConfigurator;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder.CliConfigPanel;
 import fiji.plugin.trackmate.util.cli.CommonTrackMateArguments;
-import ij.IJ;
+import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator;
 
-public class TrackastraCLI extends CLIConfigurator
+public class TrackastraCLI extends CondaCLIConfigurator
 {
 
-	public static final String KEY_TRACKASTRA_PYTHON_FILEPATH = "TRACKASTRA_PYTHON_FILEPATH";;
+	public static final String KEY_TRACKASTRA_COMMAND = "TRACKASTRA_COMMAND";
 
-	public static final String DEFAULT_TRACKASTRA_PYTHON_FILEPATH = System.getProperty( "user.home" );
+	public static final String DEFAULT_TRACKASTRA_COMMAND = "trackastra track";
 
 	public static final String KEY_TRACKASTRA_MODEL = "PRETRAINED_MODEL";
 
@@ -41,8 +37,6 @@ public class TrackastraCLI extends CLIConfigurator
 
 	public static final String KEY_TRACKASTRA_OUTPUT_TABLE_PATH = "OUTPUT_EDGE_TABLE_PATH";
 
-	public static final String TRACKSTRA_EXECUTABLE_NAME = "trackastra";
-
 	private final ChoiceArgument modelPretrained;
 
 	private final PathArgument customModelPath;
@@ -64,35 +58,11 @@ public class TrackastraCLI extends CLIConfigurator
 	public TrackastraCLI( final int nChannels )
 	{
 		getExecutableArg()
-				.name( "Trackastra env Python executable" )
-				.help( "Path to Python executable in Trackastra env." )
-				.key( KEY_TRACKASTRA_PYTHON_FILEPATH )
-				.set( DEFAULT_TRACKASTRA_PYTHON_FILEPATH );
+				.name( "Trackastra command" )
+				.help( "The command to execute the tracking process in Trackastra." )
+				.key( KEY_TRACKASTRA_COMMAND )
+				.set( DEFAULT_TRACKASTRA_COMMAND );
 
-		// Add the -m trackastra to the command and window conda cmd
-		setTranslator( getExecutableArg(), s -> {
-			final String executablePath = ( String ) s;
-			final String[] split = executablePath.replace( "\\", "/" ).split( "/" );
-			// Activate conda env if it runs in Windows.
-			final List< String > cmd = new ArrayList<>();
-			if ( IJ.isWindows() )
-			{
-				final String envname = split[ split.length - 2 ];
-				cmd.addAll( Arrays.asList( "cmd.exe", "/c", "conda", "activate", envname ) );
-				cmd.add( "&" );
-				cmd.add( TRACKSTRA_EXECUTABLE_NAME );
-				cmd.add( "track" );
-			}
-			else
-			{
-				// Calling Cellpose from python.
-				cmd.add( executablePath );
-				cmd.add( "-m" );
-				cmd.add( TRACKSTRA_EXECUTABLE_NAME );
-			}
-			return cmd;
-		} );
-		
 		this.modelPretrained = addChoiceArgument()
 				.name( "Model pretrained" )
 				.help( "Name of pretrained Trackastra model." )

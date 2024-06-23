@@ -1,6 +1,6 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
-import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.TRACKSTRA_EXECUTABLE_NAME;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_COMMAND;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -209,8 +209,8 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		{
 
 			final List< String > cmd = CommandBuilder.build( cli );
-			logger.setStatus( "Running " + TRACKSTRA_EXECUTABLE_NAME );
-			logger.log( "Running " + TRACKSTRA_EXECUTABLE_NAME + " with args:\n" );
+			logger.setStatus( "Running " + DEFAULT_TRACKASTRA_COMMAND );
+			logger.log( "Running " + DEFAULT_TRACKASTRA_COMMAND + " with args:\n" );
 			cmd.forEach( t -> {
 				if ( t.contains( File.separator ) )
 					logger.log( t + ' ' );

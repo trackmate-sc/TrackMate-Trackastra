@@ -7,7 +7,7 @@ import static fiji.plugin.trackmate.io.IOUtils.readStringAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_CUSTOM_MODEL_FOLDER;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_MODEL;
-import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_PYTHON_FILEPATH;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_COMMAND;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_TRACKING_MODE;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_USE_GPU;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER;
@@ -15,7 +15,7 @@ import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKA
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_INPUT_MASKS_FOLDER;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_MODEL;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_OUTPUT_TABLE_PATH;
-import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_PYTHON_FILEPATH;
+import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_COMMAND;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_TRACKING_MODE;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_USE_GPU;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
@@ -130,7 +130,7 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 	{
 		boolean ok = true;
 		final StringBuilder errorHolder = new StringBuilder();
-		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_PYTHON_FILEPATH, String.class, errorHolder );
+		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_COMMAND, String.class, errorHolder );
 		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_MODEL, String.class, errorHolder );
 		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, String.class, errorHolder );
 		ok = ok & writeAttribute( settings, element, KEY_TRACKASTRA_TRACKING_MODE, String.class, errorHolder );
@@ -147,7 +147,7 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 		settings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
-		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_PYTHON_FILEPATH, errorHolder );
+		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_COMMAND, errorHolder );
 		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_MODEL, errorHolder );
 		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, errorHolder );
 		ok = ok & readStringAttribute( element, settings, KEY_TRACKASTRA_TRACKING_MODE, errorHolder );
@@ -170,7 +170,7 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 	public Map< String, Object > getDefaultSettings()
 	{
 		final Map< String, Object > map = new HashMap<>();
-		map.put( KEY_TRACKASTRA_PYTHON_FILEPATH, DEFAULT_TRACKASTRA_PYTHON_FILEPATH );
+		map.put( KEY_TRACKASTRA_COMMAND, DEFAULT_TRACKASTRA_COMMAND );
 		map.put( KEY_TRACKASTRA_MODEL, DEFAULT_TRACKASTRA_MODEL );
 		map.put( KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, DEFAULT_TRACKASTRA_CUSTOM_MODEL_FOLDER );
 		map.put( KEY_TRACKASTRA_TRACKING_MODE, DEFAULT_TRACKASTRA_TRACKING_MODE );
@@ -193,7 +193,7 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 
 		boolean ok = true;
 		final StringBuilder str = new StringBuilder();
-		ok = ok & checkParameter( settings, KEY_TRACKASTRA_PYTHON_FILEPATH, String.class, str );
+		ok = ok & checkParameter( settings, KEY_TRACKASTRA_COMMAND, String.class, str );
 		ok = ok & checkParameter( settings, KEY_TRACKASTRA_MODEL, String.class, str );
 		ok = ok & checkParameter( settings, KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER, String.class, str );
 		ok = ok & checkParameter( settings, KEY_TRACKASTRA_TRACKING_MODE, String.class, str );
