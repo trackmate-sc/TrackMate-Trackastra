@@ -115,7 +115,7 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 	public TrackastraTracker create( final SpotCollection spots, final Map< String, Object > settings, final ImagePlus imp )
 	{
 		final TrackastraCLI cli = new TrackastraCLI( imp.getNChannels() );
-		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli, cli.imageChannel() );
+		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli );
 		return new TrackastraTracker( cli, spots, imp );
 	}
 

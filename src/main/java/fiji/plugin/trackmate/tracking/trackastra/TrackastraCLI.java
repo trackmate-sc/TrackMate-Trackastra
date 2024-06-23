@@ -1,19 +1,15 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder.CliConfigPanel;
+import fiji.plugin.trackmate.util.cli.CommonTrackMateArguments;
 import ij.IJ;
 
 public class TrackastraCLI extends CLIConfigurator
@@ -63,15 +59,10 @@ public class TrackastraCLI extends CLIConfigurator
 
 	private final PathArgument outputEdgeFile;
 
-	private final IntElement imageChannel;
+	private final IntArgument imageChannel;
 
 	public TrackastraCLI( final int nChannels )
 	{
-		final AtomicInteger selectedChannel = new AtomicInteger( 1 );
-		this.imageChannel = StyleElements.intElement( KEY_TARGET_CHANNEL,
-				1, nChannels,
-				selectedChannel::get, selectedChannel::set );
-
 		getExecutableArg()
 				.name( "Trackastra env Python executable" )
 				.help( "Path to Python executable in Trackastra env." )
@@ -138,7 +129,7 @@ public class TrackastraCLI extends CLIConfigurator
 
 		this.useGPU = addFlag()
 				.name( "Use GPU" )
-				.help( "If set, the GPU wil be used for computation." )
+				.help( "If set, the GPU will be used for computation." )
 				.argument( "--device" )
 				.defaultValue( DEFAULT_USE_GPU )
 				.key( KEY_USE_GPU )
@@ -171,6 +162,8 @@ public class TrackastraCLI extends CLIConfigurator
 				.required( true )
 				.key( KEY_TRACKASTRA_OUTPUT_TABLE_PATH )
 				.get();
+
+		this.imageChannel = addExtraArgument( CommonTrackMateArguments.targetChannel( nChannels ) );
 	}
 
 	public PathArgument customModelPath()
@@ -204,22 +197,22 @@ public class TrackastraCLI extends CLIConfigurator
 	}
 
 	/**
-	 * Exposes the element that configures in what channel of the source image
+	 * Exposes the argument that configures in what channel of the source image
 	 * are the objects we want to track. The channel value is 1-based.
 	 * <p>
 	 * This is important for a multi-channel image. In Trackastra, this channel
 	 * is used to computes some object features used for tracking. This extra
 	 * element is not used in the CLI.
 	 * 
-	 * @return the image channel element.
+	 * @return the image channel argument.
 	 */
-	public IntElement imageChannel()
+	public IntArgument imageChannel()
 	{
 		return imageChannel;
 	}
 
 	public static CliConfigPanel build( final TrackastraCLI cli )
 	{
-		return CliGuiBuilder.build( cli, cli.imageChannel );
+		return CliGuiBuilder.build( cli );
 	}
 }

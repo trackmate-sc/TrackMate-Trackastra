@@ -108,7 +108,7 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli, cli.imageChannel() );
+		TrackMateSettingsBuilder.fromTrackMateSettings( settings, cli );
 		mainPanel.refresh();
 	}
 
@@ -116,7 +116,7 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 	public Map< String, Object > getSettings()
 	{
 		final Map< String, Object > map = new HashMap<>();
-		TrackMateSettingsBuilder.toTrackMateSettings( map, cli, cli.imageChannel() );
+		TrackMateSettingsBuilder.toTrackMateSettings( map, cli );
 		return map;
 	}
 

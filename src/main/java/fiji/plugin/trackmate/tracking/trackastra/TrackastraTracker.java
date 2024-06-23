@@ -156,7 +156,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		else
 		{
 			// Get the right channel.
-			c = cli.imageChannel().get();
+			c = cli.imageChannel().getValue();
 			final int nZ = imp.getNSlices();
 			final int nT = imp.getNFrames();
 			out = new Duplicator().run( imp, c, c, 1, nZ, 1, nT );
