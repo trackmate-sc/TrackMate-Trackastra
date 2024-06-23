@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.input.Tailer;
@@ -190,7 +189,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		cli.imageFolder().set( imgTmpFolder.toString() );
 		final Path edgeCSVTablePath = maskTmpFolder.resolve( EDGE_CSV_FILENAME );
 		cli.outputEdgeFile().set( edgeCSVTablePath.toString() );
-		final String executableName = Paths.get( cli.getExecutableArg().getValue() ).getFileName().toString();
+		final String executableName = cli.getCommand();
 
 		// Check validity of the CLI.
 		final String error = cli.check();

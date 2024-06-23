@@ -57,12 +57,6 @@ public class TrackastraCLI extends CondaCLIConfigurator
 
 	public TrackastraCLI( final int nChannels )
 	{
-		getExecutableArg()
-				.name( "Trackastra command" )
-				.help( "The command to execute the tracking process in Trackastra." )
-				.key( KEY_TRACKASTRA_COMMAND )
-				.set( DEFAULT_TRACKASTRA_COMMAND );
-
 		this.modelPretrained = addChoiceArgument()
 				.name( "Model pretrained" )
 				.help( "Name of pretrained Trackastra model." )
@@ -136,6 +130,12 @@ public class TrackastraCLI extends CondaCLIConfigurator
 		this.imageChannel = addExtraArgument( CommonTrackMateArguments.targetChannel( nChannels ) );
 	}
 
+	@Override
+	protected String getCommand()
+	{
+		return DEFAULT_TRACKASTRA_COMMAND;
+	}
+
 	public PathArgument customModelPath()
 	{
 		return customModelPath;
@@ -173,7 +173,7 @@ public class TrackastraCLI extends CondaCLIConfigurator
 	 * This is important for a multi-channel image. In Trackastra, this channel
 	 * is used to computes some object features used for tracking. This extra
 	 * element is not used in the CLI.
-	 * 
+	 *
 	 * @return the image channel argument.
 	 */
 	public IntArgument imageChannel()
