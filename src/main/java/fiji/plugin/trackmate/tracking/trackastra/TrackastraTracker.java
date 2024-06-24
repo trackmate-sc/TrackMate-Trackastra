@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
-import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_COMMAND;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -208,8 +206,8 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		{
 
 			final List< String > cmd = CommandBuilder.build( cli );
-			logger.setStatus( "Running " + DEFAULT_TRACKASTRA_COMMAND );
-			logger.log( "Running " + DEFAULT_TRACKASTRA_COMMAND + " with args:\n" );
+			logger.setStatus( "Running " + executableName );
+			logger.log( "Running " + executableName + " with args:\n" );
 			cmd.forEach( t -> {
 				if ( t.contains( File.separator ) )
 					logger.log( t + ' ' );
@@ -217,6 +215,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 					logger.log( t + ' ', Logger.GREEN_COLOR.darker() );
 			} );
 			logger.log( "\n" );
+
 			final ProcessBuilder pb = new ProcessBuilder( cmd );
 			pb.redirectOutput( ProcessBuilder.Redirect.appendTo( logFile ) );
 			pb.redirectError( ProcessBuilder.Redirect.appendTo( logFile ) );
@@ -236,12 +235,24 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			{
 				errorMessage = BASE_ERROR_MESSAGE + "Problem running " + executableName + ":\n" + e.getMessage();
 			}
+			try
+			{
+				errorMessage = errorMessage + '\n' + new String( Files.readAllBytes( logFile.toPath() ) );
+			}
+			catch ( final IOException e1 )
+			{}
 			e.printStackTrace();
 			return false;
 		}
 		catch ( final Exception e )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + "Problem running " + executableName + ":\n" + e.getMessage();
+			try
+			{
+				errorMessage = errorMessage + '\n' + new String( Files.readAllBytes( logFile.toPath() ) );
+			}
+			catch ( final IOException e1 )
+			{}
 			e.printStackTrace();
 			return false;
 		}
@@ -267,6 +278,12 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 			errorMessage = BASE_ERROR_MESSAGE + "Could not find Trackastra output file " + EDGE_CSV_FILENAME + "\n"
 					+ "Trackastra did not execute properly?\n"
 					+ e.getMessage();
+			try
+			{
+				errorMessage = errorMessage + '\n' + new String( Files.readAllBytes( logFile.toPath() ) );
+			}
+			catch ( final IOException e1 )
+			{}
 			return false;
 		}
 		catch ( final IOException e )
