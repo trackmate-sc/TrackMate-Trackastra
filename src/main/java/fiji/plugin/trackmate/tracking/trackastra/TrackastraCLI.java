@@ -12,10 +12,6 @@ import ij.IJ;
 public class TrackastraCLI extends CondaCLIConfigurator
 {
 
-	public static final String KEY_TRACKASTRA_COMMAND = "TRACKASTRA_COMMAND";
-
-	public static final String DEFAULT_TRACKASTRA_COMMAND = "trackastra track";
-
 	public static final String KEY_TRACKASTRA_MODEL = "PRETRAINED_MODEL";
 
 	public static final String DEFAULT_TRACKASTRA_MODEL = "general_2d";
