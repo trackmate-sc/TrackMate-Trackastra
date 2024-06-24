@@ -7,6 +7,7 @@ import fiji.plugin.trackmate.util.cli.CliGuiBuilder;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder.CliConfigPanel;
 import fiji.plugin.trackmate.util.cli.CommonTrackMateArguments;
 import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator;
+import ij.IJ;
 
 public class TrackastraCLI extends CondaCLIConfigurator
 {
@@ -133,7 +134,7 @@ public class TrackastraCLI extends CondaCLIConfigurator
 	@Override
 	protected String getCommand()
 	{
-		return DEFAULT_TRACKASTRA_COMMAND;
+		return IJ.isWindows() ? "trackastra track" : "trackastra.cli track";
 	}
 
 	public PathArgument customModelPath()
