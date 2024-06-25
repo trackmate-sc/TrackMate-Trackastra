@@ -34,6 +34,10 @@ public class TrackastraCLI extends CondaCLIConfigurator
 
 	public static final String KEY_TRACKASTRA_OUTPUT_TABLE_PATH = "OUTPUT_EDGE_TABLE_PATH";
 
+	public static final String KEY_TRACKASTRA_PRETRAINED_OR_CUSTOM = "PRETRAINED_OR_CUSTOM";
+
+	public static final String DEFAULT_TRACKASTRA_PRETRAINED_OR_CUSTOM = KEY_TRACKASTRA_MODEL;
+
 	private final ChoiceArgument modelPretrained;
 
 	private final PathArgument customModelPath;
@@ -75,7 +79,8 @@ public class TrackastraCLI extends CondaCLIConfigurator
 		// State that we can set one or the other.
 		this.selectPretrainedOrCustom = addSelectableArguments()
 				.add( modelPretrained )
-				.add( customModelPath );
+				.add( customModelPath )
+				.key( KEY_TRACKASTRA_PRETRAINED_OR_CUSTOM );
 
 		this.trackingMode = addChoiceArgument()
 				.name( "Tracking mode" )
