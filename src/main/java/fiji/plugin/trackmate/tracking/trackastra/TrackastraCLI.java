@@ -76,7 +76,6 @@ public class TrackastraCLI extends CondaCLIConfigurator
 		this.selectPretrainedOrCustom = addSelectableArguments()
 				.add( modelPretrained )
 				.add( customModelPath );
-		selectPretrainedOrCustom.select( modelPretrained );
 
 		this.trackingMode = addChoiceArgument()
 				.name( "Tracking mode" )
@@ -176,6 +175,11 @@ public class TrackastraCLI extends CondaCLIConfigurator
 	public IntArgument imageChannel()
 	{
 		return imageChannel;
+	}
+
+	public SelectableArguments selectPretrainedOrCustom()
+	{
+		return selectPretrainedOrCustom;
 	}
 
 	public static CliConfigPanel build( final TrackastraCLI cli )
