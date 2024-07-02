@@ -22,8 +22,6 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
 
-import java.util.Collections;
-
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder.CliConfigPanel;
 import fiji.plugin.trackmate.util.cli.CommonTrackMateArguments;
@@ -41,9 +39,9 @@ public class TrackastraCLI extends CondaCLIConfigurator
 
 	public static final String DEFAULT_TRACKASTRA_CUSTOM_MODEL_FOLDER = System.getProperty( "user.home" );
 
-	public static final String KEY_USE_GPU = "USE_GPU";
+	public static final String KEY_DEVICE = "DEVICE";
 
-	public static final Boolean DEFAULT_USE_GPU = Boolean.valueOf( true );
+	public static final String DEFAULT_DEVICE = "automatic";
 
 	public static final String KEY_TRACKASTRA_TRACKING_MODE = "TRACKING_MODE";
 
@@ -67,7 +65,7 @@ public class TrackastraCLI extends CondaCLIConfigurator
 
 	private final ChoiceArgument trackingMode;
 
-	private final Flag useGPU;
+	private final ChoiceArgument useDevice;
 
 	private final PathArgument imageFolder;
 
@@ -105,6 +103,8 @@ public class TrackastraCLI extends CondaCLIConfigurator
 
 		this.trackingMode = addChoiceArgument()
 				.name( "Tracking mode" )
+				.help( "Mode for candidate graph pruning. For installing the ilp tracker, see " +
+						" https://github.com/weigertlab/trackastra#installation." )
 				.argument( "--mode" )
 				.addChoice( "greedy_nodiv" )
 				.addChoice( "greedy" )
@@ -113,14 +113,18 @@ public class TrackastraCLI extends CondaCLIConfigurator
 				.key( KEY_TRACKASTRA_TRACKING_MODE )
 				.get();
 
-		this.useGPU = addFlag()
+		this.useDevice = addChoiceArgument()
 				.name( "Use GPU" )
-				.help( "If set, the GPU will be used for computation." )
+				.help( "Device to use. If not set, tries to use cuda/mps if available, otherwise "
+						+ " falling back to cpu." )
+				.key( KEY_DEVICE )
 				.argument( "--device" )
-				.defaultValue( DEFAULT_USE_GPU )
-				.key( KEY_USE_GPU )
+				.addChoice( DEFAULT_DEVICE )
+				.addChoice( "mps" )
+				.addChoice( "cuda" )
+				.addChoice( "cpu" )
+				.defaultValue( DEFAULT_DEVICE )
 				.get();
-		setTranslator( useGPU, b -> Collections.singletonList( ( ( Boolean ) b ).booleanValue() ? "cuda" : "cpu" ) );
 
 		this.imageFolder = addPathArgument()
 				.name( "Input image folder path" )
@@ -186,6 +190,11 @@ public class TrackastraCLI extends CondaCLIConfigurator
 	public ChoiceArgument trackingMode()
 	{
 		return trackingMode;
+	}
+
+	public ChoiceArgument useDevice()
+	{
+		return useDevice;
 	}
 
 	/**
