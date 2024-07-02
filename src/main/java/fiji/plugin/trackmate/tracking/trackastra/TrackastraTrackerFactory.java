@@ -75,19 +75,22 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 	/** The pretty name of the target detector. */
 	public static final String NAME = "Trackastra tracker";
 
+	protected static final String DOC1_URL = "https://imagej.net/plugins/trackmate/trackers/trackmate-trackastra";
+
+	public static final String SHORT_INFO_TEXT = "Trackastra links segmented cells by predicting associations "
+			+ "with a transformer model that was trained on a diverse set of 2D and 3D microscopy videos.";
+
 	/** An html information text. */
 	public static final String INFO_TEXT = "<html>"
-			+ "This tracker relies on Trackastra to track objects."
+			+ "This tracker relies on Trackastra to track objects. "
+			+ SHORT_INFO_TEXT
 			+ "<p>"
-			+ "The detector simply calls an external Trackastra installation. So for this "
+			+ "This tracker module simply calls an external Trackastra installation. So for it "
 			+ "to work, you must have a Trackastra installation running on your computer. "
 			+ "Please follow the instructions from the Trackastra website: "
 			+ "<u><a href=\"https://github.com/weigertlab/trackastra\">https://github.com/weigertlab/trackastra</a></u>"
-			+ "<p>"
-			+ "You will also need to specify the path to the <b>Python executable</b> that can run Trackastra. "
-			+ "For instance if you used anaconda to install Trackastra, and that you have a "
-			+ "Conda environment called 'trackastra', this path will be something along the line of "
-			+ "'/opt/anaconda3/envs/trackastra/bin/python'."
+			+ "In the next config panel, you will also need to specify the conda "
+			+ "environment in which Trackastra is installed. "
 			+ "<p>"
 			+ "If you use this detector for your work, please be so kind as to "
 			+ "also cite the Trackastra paper: <a href=\"https://doi.org/10.48550/arXiv.2405.15700\">Benjamin Gallusser and Martin Weigert. "
@@ -95,7 +98,7 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 			+ "arXiv, 2024</a>"
 			+ "<p>"
 			+ "Documentation for this module "
-			+ "<a href=\"https://imagej.net/plugins/trackmate/trackers/trackastra\">on the ImageJ Wiki</a>."
+			+ "<a href=\"" + DOC1_URL + "\">on the ImageJ Wiki</a>."
 			+ "</html>";
 
 	public static final ImageIcon ICON;
@@ -131,7 +134,6 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 	{
 		return NAME;
 	}
-
 
 	@Override
 	public TrackastraTracker create( final SpotCollection spots, final Map< String, Object > settings, final ImagePlus imp )

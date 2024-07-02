@@ -22,12 +22,8 @@
 package fiji.plugin.trackmate.tracking.trackastra;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
-import static fiji.plugin.trackmate.gui.Fonts.FONT;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,8 +50,6 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 
 	protected static final ImageIcon ICON = GuiUtils.scaleImage( TrackastraTrackerFactory.ICON, 64, 64 );
 
-	protected static final String DOC1_URL = "https://imagej.net/plugins/trackmate/trackerss/trackmate-trackastra";
-
 	private final TrackastraCLI cli;
 
 	private final CliConfigPanel mainPanel;
@@ -72,7 +66,7 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 		 */
 
 		final JPanel header = new JPanel();
-		header.setBorder( BorderFactory.createEmptyBorder( 5, 0, 5, 0 ) );
+		header.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		header.setLayout( new BoxLayout( header, BoxLayout.Y_AXIS ) );
 
 		final JLabel lblDetector = new JLabel( TITLE, ICON, JLabel.RIGHT );
@@ -80,17 +74,8 @@ public class TrackastraConfigurationPanel extends ConfigurationPanel
 		lblDetector.setHorizontalAlignment( SwingConstants.CENTER );
 		lblDetector.setAlignmentX( JLabel.CENTER_ALIGNMENT );
 		header.add( lblDetector );
-
-		final String text = "Click here for the documentation";
-		final JLabel lblUrl = new JLabel( text );
-		lblUrl.setHorizontalAlignment( SwingConstants.CENTER );
-		lblUrl.setAlignmentX( JLabel.CENTER_ALIGNMENT );
-		lblUrl.setForeground( Color.BLUE.darker() );
-		lblUrl.setFont( FONT.deriveFont( Font.ITALIC ) );
-		lblUrl.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
-		lblUrl.addMouseListener( GuiUtils.createURLMouseListener( lblUrl, DOC1_URL, text ) );
 		header.add( Box.createVerticalStrut( 5 ) );
-		header.add( lblUrl );
+		header.add( GuiUtils.infoDisplay( "<html>" + TrackastraTrackerFactory.SHORT_INFO_TEXT + "</html>", false ) );
 
 		add( header, BorderLayout.NORTH );
 
