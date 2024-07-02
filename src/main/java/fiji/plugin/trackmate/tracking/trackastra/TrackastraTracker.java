@@ -44,9 +44,9 @@ import fiji.plugin.trackmate.util.cli.CLIUtils;
 import fiji.plugin.trackmate.util.cli.CLIUtils.LoggerTailerListener;
 import fiji.plugin.trackmate.util.cli.CommandBuilder;
 import fiji.plugin.trackmate.visualization.GlasbeyLut;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
-import ij.plugin.StackWriter;
 import net.imagej.ImgPlus;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -139,7 +139,7 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 				spots, dims, calibration, exportSpotsAsDots, labelIdPainting,
 				new UnsignedShortType(), logger );
 		final ImagePlus maskImp = ImageJFunctions.wrap( masks, "masks" );
-		maskImp.setDimensions( 1, 1, imp.getNFrames() );
+		maskImp.setDimensions( 1, imp.getNSlices(), imp.getNFrames() );
 		maskImp.setLut( GlasbeyLut.toLUT() );
 		maskImp.setDisplayRange( 0, 255 );
 		maskImp.setOpenAsHyperStack( true );
@@ -149,10 +149,14 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		{
 			maskTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-masks_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( maskTmpFolder );
-			final String saveOptions = "";
 			logger.setStatus( "Saving masks" );
 			logger.log( "Saving masks to " + maskTmpFolder + "\n" );
-			StackWriter.save( maskImp, maskTmpFolder.toString() + File.separator, saveOptions );
+			final boolean ok = writeStackList( maskImp, 1, maskTmpFolder.toString(), "-mask-t" );
+			if ( !ok )
+			{
+				errorMessage = BASE_ERROR_MESSAGE + "Problem saving masks.\n";
+				return false;
+			}
 		}
 		catch ( final IOException e )
 		{
@@ -164,21 +168,15 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		 * 2. Export input image to tmp folder.
 		 */
 
-		final int nChannels = imp.getNChannels();
-		final ImagePlus out;
 		final int c;
-		if ( nChannels == 1 )
+		if ( imp.getNChannels() == 1 )
 		{
-			c = -1;
-			out = imp;
+			c = 1;
 		}
 		else
 		{
 			// Get the right channel.
 			c = cli.imageChannel().getValue();
-			final int nZ = imp.getNSlices();
-			final int nT = imp.getNFrames();
-			out = new Duplicator().run( imp, c, c, 1, nZ, 1, nT );
 		}
 
 		Path imgTmpFolder;
@@ -186,13 +184,17 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 		{
 			imgTmpFolder = Files.createTempDirectory( "TrackMate-Trackastra-imgs_" );
 			CLIUtils.recursiveDeleteOnShutdownHook( imgTmpFolder );
-			final String saveOptions = "";
 			logger.setStatus( "Saving source image" );
 			if ( c < 0 )
 				logger.log( "Saving source image to " + imgTmpFolder + "\n" );
 			else
 				logger.log( "Saving channel " + c + " of the source image to " + imgTmpFolder + "\n" );
-			StackWriter.save( out, imgTmpFolder.toString() + File.separator, saveOptions );
+			final boolean ok = writeStackList( imp, c, imgTmpFolder.toString(), "-img-t" );
+			if ( !ok )
+			{
+				errorMessage = BASE_ERROR_MESSAGE + "Problem saving masks.\n";
+				return false;
+			}
 		}
 		catch ( final IOException e )
 		{
@@ -360,5 +362,25 @@ public class TrackastraTracker implements SpotTracker, Benchmark
 	public void setLogger( final Logger logger )
 	{
 		this.logger = logger;
+	}
+
+	public boolean writeStackList( final ImagePlus imp, final int c, final String folder, final String suffix )
+	{
+		final int nT = imp.getNFrames();
+		final int nZ = imp.getNSlices();
+		for ( int t = 1; t <= nT; t++ )
+		{
+			final String name = String.format( imp.getShortTitle() + suffix + "%04d", t );
+			final ImagePlus dup = new Duplicator().run( imp, c, c, 1, nZ, t, t );
+			dup.setTitle( name );
+			final String path = folder + File.separator + name + ".tif";
+			final boolean ok = IJ.saveAsTiff( dup, path );
+			if (!ok)
+			{
+				logger.error( "Problem saving to " + path + '\n' );
+				return false;
+			}
+		}
+		return true;
 	}
 }
