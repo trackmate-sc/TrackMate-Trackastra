@@ -21,7 +21,7 @@
  */
 package fiji.plugin.trackmate.tracking.trackastra;
 
-import fiji.plugin.trackmate.LoadTrackMatePlugIn;
+import fiji.plugin.trackmate.TrackMatePlugIn;
 
 public class TrackastraTestDrive
 {
@@ -31,9 +31,10 @@ public class TrackastraTestDrive
 //		ImageJ.main( args );
 
 //		final String img = "../TrackMate/samples/MAX_Merged.tif";
-//		new TrackMatePlugIn().run( img );
+		final String img = "samples/Fluo-C3DL-MDA231-training.tif";
+		new TrackMatePlugIn().run( img );
 
-		final String img = "samples/MAX_Merged.xml";
-		new LoadTrackMatePlugIn().run( img );
+//		final String img = "samples/MAX_Merged.xml";
+//		new LoadTrackMatePlugIn().run( img );
 	}
 }
