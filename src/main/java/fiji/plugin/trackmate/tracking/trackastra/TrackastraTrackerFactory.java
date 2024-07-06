@@ -32,10 +32,7 @@ import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TR
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.DEFAULT_TRACKASTRA_TRACKING_MODE;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_DEVICE;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_CUSTOM_MODEL_FOLDER;
-import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_INPUT_IMGS_FOLDER;
-import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_INPUT_MASKS_FOLDER;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_MODEL;
-import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_OUTPUT_TABLE_PATH;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_PRETRAINED_OR_CUSTOM;
 import static fiji.plugin.trackmate.tracking.trackastra.TrackastraCLI.KEY_TRACKASTRA_TRACKING_MODE;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
@@ -203,9 +200,6 @@ public class TrackastraTrackerFactory implements SpotImageTrackerFactory
 		map.put( KEY_DEVICE, DEFAULT_DEVICE );
 		map.put( KEY_TARGET_CHANNEL, Integer.valueOf( 1 ) );
 		map.put( KEY_TRACKASTRA_PRETRAINED_OR_CUSTOM, DEFAULT_TRACKASTRA_PRETRAINED_OR_CUSTOM );
-		map.put( KEY_TRACKASTRA_INPUT_MASKS_FOLDER, null );
-		map.put( KEY_TRACKASTRA_INPUT_IMGS_FOLDER, null );
-		map.put( KEY_TRACKASTRA_OUTPUT_TABLE_PATH, null );
 		return map;
 	}
 

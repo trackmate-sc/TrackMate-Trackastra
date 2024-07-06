@@ -47,12 +47,6 @@ public class TrackastraCLI extends CondaCLIConfigurator
 
 	public static final String DEFAULT_TRACKASTRA_TRACKING_MODE = "greedy";
 
-	public static final String KEY_TRACKASTRA_INPUT_IMGS_FOLDER = "INPUT_IMGS_FOLDER";
-
-	public static final String KEY_TRACKASTRA_INPUT_MASKS_FOLDER = "INPUT_MASKS_FOLDER";
-
-	public static final String KEY_TRACKASTRA_OUTPUT_TABLE_PATH = "OUTPUT_EDGE_TABLE_PATH";
-
 	public static final String KEY_TRACKASTRA_PRETRAINED_OR_CUSTOM = "PRETRAINED_OR_CUSTOM";
 
 	public static final String DEFAULT_TRACKASTRA_PRETRAINED_OR_CUSTOM = KEY_TRACKASTRA_MODEL;
@@ -132,7 +126,6 @@ public class TrackastraCLI extends CondaCLIConfigurator
 				.argument( "--imgs" )
 				.visible( false )
 				.required( true )
-				.key( KEY_TRACKASTRA_INPUT_IMGS_FOLDER )
 				.get();
 
 		this.maskFolder = addPathArgument()
@@ -141,7 +134,6 @@ public class TrackastraCLI extends CondaCLIConfigurator
 				.argument( "--masks" )
 				.visible( false )
 				.required( true )
-				.key( KEY_TRACKASTRA_INPUT_MASKS_FOLDER )
 				.get();
 
 		this.outputEdgeFile = addPathArgument()
@@ -150,7 +142,6 @@ public class TrackastraCLI extends CondaCLIConfigurator
 				.argument( "--output-edge-table" )
 				.visible( false )
 				.required( true )
-				.key( KEY_TRACKASTRA_OUTPUT_TABLE_PATH )
 				.get();
 
 		this.imageChannel = addExtraArgument( CommonTrackMateArguments.targetChannel( nChannels ) );
