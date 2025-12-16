@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -83,7 +85,15 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<TrackMate.version>8.1.2-SNAPSHOT</TrackMate.version>
+		<TrackMate.version>8.1.2</TrackMate.version>
+
+		<scijava.jvm.version>21</scijava.jvm.version>
+		<scijava.jvm.build.version>[21,)</scijava.jvm.build.version>
+		<scijava.javadoc.url.java>https://docs.oracle.com/en/java/javase/21/docs/api/</scijava.javadoc.url.java>
+		<!-- If we don't do this, mvn javadoc:javadoc fails because of 
+   	    Anisotropic_Diffusion_2D (bad naming, does not like the '2D' at the end), 
+   	    which is a depdency of Labkit.' -->
+		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 	</properties>
 
 	<dependencies>
